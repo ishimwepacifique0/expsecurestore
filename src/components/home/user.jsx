@@ -5,7 +5,7 @@ import AuthProvider, { AuthContext } from '../../context/context';
 import { Card } from '@rneui/themed';
 
 
-function Home() {
+function UserHome() {
     getItemAsync('userToken')
         .then((data) => {
             console.log(data)
@@ -23,7 +23,7 @@ function Home() {
 
     return (
         <View style={{backgroundColor:'white'}}>
-            <Text>Home Admin</Text>
+            <Text>Home user</Text>
             <Button title='Log out' onPress={() => { Logout() }} />
             <View style={{ width: '40%', backgroundColor: 'white', elevation: 10, borderRadius: 10 }}>
             <Card.Title>CARD WITH DIVIDER</Card.Title>
@@ -41,4 +41,4 @@ function Home() {
     )
 }
 
-export default Home
+export default UserHome

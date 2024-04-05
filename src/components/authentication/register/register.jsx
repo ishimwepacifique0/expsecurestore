@@ -1,5 +1,8 @@
+import { createUserWithEmailAndPassword } from 'firebase/auth';
 import React, { useState } from 'react';
 import { StyleSheet, View, Text, TextInput, TouchableOpacity,Keyboard } from 'react-native';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../../../../firebaseconfiguretion';
+import { doc, setDoc } from 'firebase/firestore';
 const emailValidation = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 export default function RegisterForm() {
@@ -12,7 +15,7 @@ export default function RegisterForm() {
   const [usernameError, setUsernameError] = useState('');
   const [telephoneError, setTelephoneError] = useState('');
 
-  const _handlePress = () => {
+  const _handlePress = async () => {
     Keyboard.dismiss();
     if (!emailValidation.test(email)) {
       setEmailError('Please enter a valid email address');
@@ -24,6 +27,18 @@ export default function RegisterForm() {
       console.log('Password:', password);
       console.log('Username:', username);
       console.log('Telephone:', telephone);
+      try {
+        const { user } = await createUserWithEmailAndPassword(FIREBASE_AUTH, email, password);
+        await setDoc(doc(FIREBASE_DB,"user",user.uid),{
+          email:email,
+          username:username,
+          telephone:telephone,
+          accounttype:"admin"
+        })
+        console.log("User registered successfully:", user);
+      } catch (error) {
+        console.error("Error registering user:", error);
+      }
     }
   };
 
@@ -100,4 +115,4 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 16,
   },
-});
+})

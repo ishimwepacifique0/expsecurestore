@@ -12,29 +12,23 @@ export const AuthContext = createContext()
 export default function AuthProvider({children}){
     const auth =  FIREBASE_AUTH
     const[islog,setLog] = React.useState(false)
+    const [checkusertype,setCheckusertype] = React.useState('')
 
     return(
         <AuthContext.Provider value={{
             islog,
             setLog,
-            login: async (email,password) => {
+            checkusertype,
+            setCheckusertype,
+            login: async (email,password) =>{
                 try {
-                    const response = await signInWithEmailAndPassword(auth, email, password)
-                    console.log(response.user.stsTokenManager.accessToken)
-                    setLog(true)
-                    try{
-                        // await AsyncStorage.setItem("userToken",JSON.stringify(response.user.stsTokenManager.accessToken))
-                        await setItemAsync('userToken',JSON.stringify(response.user.stsTokenManager.accessToken))
-                        await setItemAsync('email',JSON.stringify(email))
-
-                    }catch(ruth){
-                        console.log(ruth)
-                    }
+                    const response = await signInWithEmailAndPassword(auth,email,password)
+                    console.log(response)
+                    setLog(true)                    
                 } catch (error) {
-                    setLog(false)
-                    console.log(error)
+                    console.error(error)
                 }
-            },
+            } ,
             logout: async () => {
                 setLog(false)
                 await deleteItemAsync('userToken')

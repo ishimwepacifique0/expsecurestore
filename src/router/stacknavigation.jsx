@@ -6,6 +6,7 @@ import { AuthContext } from '../context/context';
 import { useContext, useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getItemAsync } from 'expo-secure-store';
+import UserHome from '../components/home/user';
 
 
 
@@ -15,35 +16,45 @@ const Stack = createStackNavigator();
 
 
 export default function MyStack() {
-    const { islog } = useContext(AuthContext)
-    const [checkToken,setCheckToken] = useState(false)
-    useEffect(()=>{
-        const getTokenfromStorage = async ()=>{
-            try{
+    const { islog, checkusertype } = useContext(AuthContext)
+    const [checkToken, setCheckToken] = useState(false)
+    useEffect(() => {
+        const getTokenfromStorage = async () => {
+            try {
                 // const token = await AsyncStorage.getItem("userToken")
                 const token = await getItemAsync('userToken')
-                if(token != null){
-                      setCheckToken(true)  
-                }else{
+                if (token != null) {
+                    setCheckToken(true)
+                } else {
                     setCheckToken(false)
                 }
-            }catch(err){
+            } catch (err) {
                 console.log(err)
             }
         }
         getTokenfromStorage()
-    },[])
+    }, [])
     return (
         <Stack.Navigator >
             {islog ? (
                 <>
-                    <Stack.Screen name="Home" component={Home} />
+                    {checkusertype == "customer" ? (
+                        <Stack.Screen name="usersdashboard" component={UserHome} />
+
+                    ) : null}
+
+                    {checkusertype == "admin" ? (
+                        <Stack.Screen name="admindashboard" component={Home} />
+
+                    ) : null}
 
                 </>
             ) : (<>
                 <Stack.Screen name="login" component={LoginForm} />
                 <Stack.Screen name="register" component={RegisterForm} />
             </>)}
+
+
 
         </Stack.Navigator>
     );

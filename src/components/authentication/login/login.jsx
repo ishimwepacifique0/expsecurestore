@@ -1,6 +1,11 @@
 import React, { useState,useContext } from 'react';
 import { StyleSheet, View, TextInput, Text, TouchableOpacity, Keyboard } from 'react-native';
 import { AuthContext } from '../../../context/context';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { FIREBASE_AUTH, FIREBASE_DB } from '../../../../firebaseconfiguretion';
+import { doc,getDoc } from 'firebase/firestore';
+
+
 
 const emailValidation = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
@@ -9,10 +14,10 @@ export default function LoginForm() {
   const [password, setPassword] = useState('');
   const [emailError, setEmailError] = useState('');
   const [passwordError, setPasswordError] = useState('');
-  const context = useContext(AuthContext)
+  const {checkusertype,setCheckusertype,setLog} = useContext(AuthContext)
 
 
-  const _handlePress = () => {
+  const _handlePress = async() => {
     Keyboard.dismiss();
     if (!emailValidation.test(email)) {
       setEmailError('Please enter a valid email address');
@@ -22,7 +27,38 @@ export default function LoginForm() {
       
       console.log('Email:', email);
       console.log('Password:', password);
-      context.login(email,password)
+      try {
+        
+        const { user } = await signInWithEmailAndPassword(FIREBASE_AUTH, email, password);
+        console.log("User logged in successfully:", user.uid);
+      
+        const userDoc = doc(FIREBASE_DB, "user", user.uid);
+        const singleDoc = await getDoc(userDoc);
+        console.log(singleDoc.data())
+        if (singleDoc.exists()) {
+          const userData = singleDoc.data();
+          
+          if (userData && userData.accounttype === "customer") {
+            console.log("User is a customer.");
+            setCheckusertype("customer");
+            setLog(true)
+          } else if (userData && userData.accounttype === "admin") {
+            console.log("User is an admin.");
+            setCheckusertype("admin")
+            setLog(true);
+          } else {
+            
+            console.log("Invalid account type or no account type specified.");
+          } 
+        } else {
+         
+          console.log("User document does not exist.");
+        }
+      } catch (error) {
+        console.error("Error logging in:", error);
+        
+      }
+      
     }
   };
 
@@ -30,6 +66,7 @@ export default function LoginForm() {
     <View style={styles.container}>
       <Text style={styles.errorText}>{emailError}</Text>
       <View style={styles.inputView}>
+        <Text style={{fontFamily:'K2D_500Medium_Italic'}}>Email</Text>
         <TextInput
           style={styles.TextInput}
           placeholder="Email"
@@ -39,6 +76,7 @@ export default function LoginForm() {
       </View>
       <Text style={styles.errorText}>{passwordError}</Text>
       <View style={styles.inputView}>
+      <Text style={{fontFamily:' K2D_600SemiBold'}}>Password</Text>
         <TextInput
           style={styles.TextInput}
           placeholder="Password"
